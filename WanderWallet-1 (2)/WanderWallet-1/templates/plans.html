@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}My Plans - WanderWallet{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2">My Plans</h1>
+            <p class="text-gray-400">Track your budgets and travel goals</p>
+        </div>
+        
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <i class="fas fa-chart-pie mr-3 text-teal-primary"></i>
+                Budget Plans
+            </h2>
+            
+            {% if budgets %}
+            <div class="card-grid">
+                {% for budget in budgets %}
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-white">{{ budget.month }} {{ budget.year }}</h3>
+                            <p class="text-sm text-gray-400 mt-1">Budget Overview</p>
+                        </div>
+                        <span class="badge {% if (budget.savings / budget.income * 100) >= 30 %}badge-success{% elif (budget.savings / budget.income * 100) >= 20 %}badge-info{% else %}badge-warning{% endif %}">
+                            {{ "%.1f"|format(budget.savings / budget.income * 100) }}% saved
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Income</span>
+                            <span class="text-white font-semibold">₹{{ "%.0f"|format(budget.income) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Needs</span>
+                            <span class="text-white">₹{{ "%.0f"|format(budget.needs) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Wants</span>
+                            <span class="text-white">₹{{ "%.0f"|format(budget.wants) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Savings</span>
+                            <span class="text-teal-primary font-bold">₹{{ "%.0f"|format(budget.savings) }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ (budget.savings / budget.income * 100)|int }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="glass-card p-8 text-center">
+                <i class="fas fa-chart-pie text-4xl text-gray-600 mb-4"></i>
+                <p class="text-gray-400 mb-4">No budget plans yet</p>
+                <a href="{{ url_for('budget') }}" class="btn-primary inline-flex">
+                    <i class="fas fa-plus mr-2"></i>Create Budget Plan
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <i class="fas fa-plane mr-3 text-purple-primary"></i>
+                Travel Plans
+            </h2>
+            
+            {% if travel_plans %}
+            <div class="card-grid">
+                {% for plan in travel_plans %}
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-white">{{ plan.destination }}</h3>
+                            <p class="text-sm text-gray-400 mt-1">From {{ plan.start_city }}</p>
+                        </div>
+                        <span class="badge badge-info">{{ plan.status|title }}</span>
+                    </div>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-calendar w-5 mr-2 text-teal-primary"></i>
+                            <span>{{ plan.travel_month }} • {{ plan.travel_days }} days</span>
+                        </div>
+                        {% if plan.total_budget %}
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-wallet w-5 mr-2 text-purple-primary"></i>
+                            <span class="text-gray-400">Budget:</span>
+                            <span class="text-white font-semibold ml-2">₹{{ "%.0f"|format(plan.total_budget) }}</span>
+                        </div>
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-piggy-bank w-5 mr-2 text-yellow-400"></i>
+                            <span class="text-gray-400">Save monthly:</span>
+                            <span class="text-teal-primary font-bold ml-2">₹{{ "%.0f"|format(plan.monthly_savings) }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <a href="{{ url_for('accommodation', plan_id=plan.id) }}" class="btn-secondary w-full text-center">
+                        <i class="fas fa-eye mr-2"></i>View Details
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="glass-card p-8 text-center">
+                <i class="fas fa-plane-slash text-4xl text-gray-600 mb-4"></i>
+                <p class="text-gray-400 mb-4">No travel plans yet</p>
+                <a href="{{ url_for('travel') }}" class="btn-primary inline-flex">
+                    <i class="fas fa-plus mr-2"></i>Plan a Trip
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

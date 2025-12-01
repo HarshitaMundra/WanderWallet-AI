@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - WanderWallet{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-teal-primary to-purple-primary mb-4">
+                <i class="fas fa-user-plus text-3xl text-white"></i>
+            </div>
+            <h2 class="text-3xl font-bold bg-gradient-to-r from-teal-primary to-purple-primary bg-clip-text text-transparent">
+                Create Account
+            </h2>
+            <p class="mt-2 text-gray-400">Join us to manage your budget & travel</p>
+        </div>
+        
+        <div class="glass-card p-8">
+            <form method="POST" action="{{ url_for('signup') }}" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-300 mb-2">
+                        Username
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-500"></i>
+                        </div>
+                        <input type="text" id="username" name="username" required
+                               class="input-field pl-10"
+                               placeholder="johndoe">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+                        Email Address
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-500"></i>
+                        </div>
+                        <input type="email" id="email" name="email" required
+                               class="input-field pl-10"
+                               placeholder="your@email.com">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+                        Password
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-500"></i>
+                        </div>
+                        <input type="password" id="password" name="password" required
+                               class="input-field pl-10"
+                               placeholder="••••••••">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary w-full">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-gray-400">
+                    Already have an account?
+                    <a href="{{ url_for('login') }}" class="text-teal-primary hover:text-teal-secondary transition-colors font-medium">
+                        Sign in
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

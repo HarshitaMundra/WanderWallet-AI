@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}Travel Planner - WanderWallet{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2">Travel Planner</h1>
+            <p class="text-gray-400">Plan your perfect trip with AI-powered insights</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="destinationGallery">
+            <div class="rounded-lg overflow-hidden h-32 md:h-40">
+                <img src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&h=300&fit=crop" 
+                     alt="Beach Destination" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
+            </div>
+            <div class="rounded-lg overflow-hidden h-32 md:h-40">
+                <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop" 
+                     alt="Mountain Destination" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
+            </div>
+            <div class="rounded-lg overflow-hidden h-32 md:h-40">
+                <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&h=300&fit=crop" 
+                     alt="City Destination" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
+            </div>
+            <div class="rounded-lg overflow-hidden h-32 md:h-40">
+                <img src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=400&h=300&fit=crop" 
+                     alt="Heritage Destination" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-map-marked-alt mr-3 text-teal-primary"></i>
+                    Trip Details
+                </h2>
+                <form id="travelForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Start City</label>
+                        <input type="text" id="start_city" name="start_city" required
+                               class="input-field" placeholder="Mumbai">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Destination City</label>
+                        <input type="text" id="destination" name="destination" required
+                               class="input-field" placeholder="Goa">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Number of Days</label>
+                        <input type="number" id="travel_days" name="travel_days" required min="1"
+                               class="input-field" placeholder="3">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Travel Month</label>
+                        <select id="travel_month" name="travel_month" required class="input-field">
+                            <option value="">Select Month</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary w-full" id="planBtn">
+                        <i class="fas fa-search mr-2"></i>
+                        Find Travel Options
+                    </button>
+                </form>
+            </div>
+            
+            <div class="glass-card p-6" id="budgetCard" style="display: none;">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-calculator mr-3 text-purple-primary"></i>
+                    Trip Budget Estimate
+                </h2>
+                <div id="budgetBreakdown"></div>
+            </div>
+        </div>
+        
+        <div id="travelOptions" style="display: none;">
+            <div class="glass-card mb-6 overflow-hidden">
+                <div class="h-48 md:h-64 relative">
+                    <img id="destinationImage" src="" alt="Destination" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-dark-primary to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-6">
+                        <h2 id="destinationName" class="text-3xl font-bold text-white mb-2"></h2>
+                        <p id="destinationSubtext" class="text-gray-300"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="glass-card p-6" id="trainCard"></div>
+                <div class="glass-card p-6" id="busCard"></div>
+                <div class="glass-card p-6" id="carCard"></div>
+            </div>
+            
+            <div class="glass-card p-6 text-center">
+                <button id="viewAccommodationBtn" class="btn-primary">
+                    <i class="fas fa-hotel mr-2"></i>
+                    View Best Accommodations & Tourist Spots
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentPlanId = null;
+
+document.getElementById('travelForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const btn = document.getElementById('planBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner mr-2"></span>Searching...';
+    
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch('/travel', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            currentPlanId = result.plan_id;
+            displayTravelOptions(result.data);
+            displayBudget(result.data);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to fetch travel options. Please try again.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-search mr-2"></i>Find Travel Options';
+    }
+});
+
+function displayBudget(data) {
+    const card = document.getElementById('budgetCard');
+    const container = document.getElementById('budgetBreakdown');
+    
+    const html = `
+        <div class="space-y-4">
+            <div class="feature-card">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400">Travel</span>
+                    <span class="text-white font-semibold">₹${data.breakdown.travel.toFixed(0)}</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400">Accommodation</span>
+                    <span class="text-white font-semibold">₹${data.breakdown.hotel.toFixed(0)}</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400">Food</span>
+                    <span class="text-white font-semibold">₹${data.breakdown.food.toFixed(0)}</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400">Sightseeing</span>
+                    <span class="text-white font-semibold">₹${data.breakdown.sightseeing.toFixed(0)}</span>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-700">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-lg font-bold text-white">Total Budget</span>
+                    <span class="text-2xl font-bold text-teal-primary">₹${data.total_budget.toFixed(0)}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-400">Suggested Monthly Savings</span>
+                    <span class="text-lg font-semibold text-purple-primary">₹${data.monthly_savings.toFixed(0)}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    card.style.display = 'block';
+    card.classList.add('fade-in');
+}
+
+async function displayTravelOptions(data) {
+    const section = document.getElementById('travelOptions');
+    section.style.display = 'block';
+    section.classList.add('fade-in');
+    
+    const destination = document.getElementById('destination').value;
+    const startCity = document.getElementById('start_city').value;
+    const days = document.getElementById('travel_days').value;
+    const month = document.getElementById('travel_month').value;
+    
+    document.getElementById('destinationName').textContent = destination;
+    document.getElementById('destinationSubtext').textContent = `${startCity} → ${destination} • ${days} days • ${month}`;
+    
+    const destinationImg = document.getElementById('destinationImage');
+    destinationImg.src = 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&h=600&fit=crop';
+    
+    try {
+        const response = await fetch('/api/fetch-destination-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ destination: destination })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.image) {
+                destinationImg.src = result.image.url;
+            }
+        }
+    } catch (error) {
+        console.log('Using default image');
+    }
+    
+    document.getElementById('trainCard').innerHTML = `
+        <h3 class="text-lg font-bold mb-4 flex items-center">
+            <i class="fas fa-train text-teal-primary mr-2"></i>
+            Train Options
+        </h3>
+        <div class="space-y-3">
+            ${data.train_options.map(train => `
+                <div class="transport-card">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-white">${train.name}</h4>
+                        <span class="badge badge-info">${train.class}</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-1">
+                        <i class="fas fa-clock mr-1"></i>${train.duration}
+                    </p>
+                    <p class="text-lg font-bold text-teal-primary">₹${train.price.toFixed(0)}</p>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    document.getElementById('busCard').innerHTML = `
+        <h3 class="text-lg font-bold mb-4 flex items-center">
+            <i class="fas fa-bus text-purple-primary mr-2"></i>
+            Bus Options
+        </h3>
+        <div class="space-y-3">
+            ${data.bus_options.map(bus => `
+                <div class="transport-card">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-white">${bus.name}</h4>
+                        <span class="badge badge-success">${bus.operator}</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-1">
+                        <i class="fas fa-clock mr-1"></i>${bus.duration}
+                    </p>
+                    <p class="text-lg font-bold text-purple-primary">₹${bus.price.toFixed(0)}</p>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    document.getElementById('carCard').innerHTML = `
+        <h3 class="text-lg font-bold mb-4 flex items-center">
+            <i class="fas fa-car text-yellow-400 mr-2"></i>
+            Car Route
+        </h3>
+        <div class="transport-card">
+            <p class="text-gray-400 mb-2">
+                <i class="fas fa-road mr-2"></i>Distance: <span class="text-white">${data.car_route.distance}</span>
+            </p>
+            <p class="text-gray-400 mb-2">
+                <i class="fas fa-clock mr-2"></i>Duration: <span class="text-white">${data.car_route.duration}</span>
+            </p>
+            <p class="text-gray-400 mb-2">
+                <i class="fas fa-tag mr-2"></i>Toll: <span class="text-white">₹${data.car_route.toll}</span>
+            </p>
+            <p class="text-lg font-bold text-yellow-400 mt-3">
+                Total: ₹${data.car_route.fuel_cost.toFixed(0)}
+            </p>
+        </div>
+    `;
+}
+
+document.getElementById('viewAccommodationBtn')?.addEventListener('click', () => {
+    if (currentPlanId) {
+        window.location.href = `/accommodation/${currentPlanId}`;
+    }
+});
+</script>
+{% endblock %}

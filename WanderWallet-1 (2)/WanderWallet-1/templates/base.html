@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="WanderWallet - Smart travel planning and budget management">
+    <title>{% block title %}WanderWallet{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            primary: '#000000',
+                            secondary: '#0a0a0a',
+                            accent: '#1a1a1a',
+                            card: '#121212',
+                        },
+                        teal: {
+                            primary: '#00d9ff',
+                            secondary: '#00b8d4',
+                            glow: 'rgba(0, 217, 255, 0.3)',
+                        },
+                        purple: {
+                            primary: '#b794f6',
+                            secondary: '#9333ea',
+                            glow: 'rgba(183, 148, 246, 0.3)',
+                        }
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 20px rgba(0, 217, 255, 0.5)',
+                        'neon-purple': '0 0 20px rgba(183, 148, 246, 0.5)',
+                        'card': '0 8px 32px rgba(0, 0, 0, 0.6)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-dark-primary text-gray-100 font-poppins min-h-screen">
+    {% if current_user.is_authenticated %}
+    <nav class="bg-dark-secondary/95 border-b border-teal-primary/10 sticky top-0 z-50 backdrop-blur-md shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('dashboard') }}" class="flex items-center space-x-2">
+                        <i class="fas fa-wallet text-teal-primary text-2xl"></i>
+                        <span class="text-xl font-bold bg-gradient-to-r from-teal-primary to-purple-primary bg-clip-text text-transparent">
+                            WanderWallet
+                        </span>
+                    </a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-4 lg:space-x-6">
+                    <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-chart-line mr-2 text-base"></i><span class="hidden lg:inline text-base">Dashboard</span><span class="lg:hidden text-base">Home</span>
+                    </a>
+                    <a href="{{ url_for('budget') }}" class="nav-link {% if request.endpoint == 'budget' %}active{% endif %}">
+                        <i class="fas fa-chart-pie mr-2 text-base"></i><span class="text-base">Budget</span>
+                    </a>
+                    <a href="{{ url_for('travel') }}" class="nav-link {% if request.endpoint == 'travel' %}active{% endif %}">
+                        <i class="fas fa-plane mr-2 text-base"></i><span class="text-base">Travel</span>
+                    </a>
+                    <a href="{{ url_for('plans') }}" class="nav-link {% if request.endpoint == 'plans' %}active{% endif %}">
+                        <i class="fas fa-list-check mr-2 text-base"></i><span class="text-base">Plans</span>
+                    </a>
+                    <a href="{{ url_for('notes') }}" class="nav-link {% if request.endpoint == 'notes' %}active{% endif %}">
+                        <i class="fas fa-sticky-note mr-2 text-base"></i><span class="text-base">Notes</span>
+                    </a>
+                    <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
+                        <i class="fas fa-user mr-2 text-base"></i><span class="text-base">Profile</span>
+                    </a>
+                </div>
+                
+                <button class="md:hidden text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-primary rounded-lg p-2.5 transition-colors" id="mobile-menu-btn" aria-label="Toggle menu">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="hidden md:hidden bg-dark-secondary/98 border-b border-teal-primary/10 shadow-lg" id="mobile-menu">
+            <div class="px-4 py-4 space-y-2">
+                <a href="{{ url_for('dashboard') }}" class="mobile-nav-link flex items-center {% if request.endpoint == 'dashboard' %}bg-teal-primary/20 text-teal-primary{% endif %} rounded-lg">
+                    <i class="fas fa-chart-line mr-4 w-6 text-lg"></i>
+                    <span class="font-semibold text-base">Dashboard</span>
+                </a>
+                <a href="{{ url_for('budget') }}" class="mobile-nav-link flex items-center {% if request.endpoint == 'budget' %}bg-teal-primary/20 text-teal-primary{% endif %} rounded-lg">
+                    <i class="fas fa-chart-pie mr-4 w-6 text-lg"></i>
+                    <span class="font-semibold text-base">Budget</span>
+                </a>
+                <a href="{{ url_for('travel') }}" class="mobile-nav-link flex items-center {% if request.endpoint == 'travel' %}bg-teal-primary/20 text-teal-primary{% endif %} rounded-lg">
+                    <i class="fas fa-plane mr-4 w-6 text-lg"></i>
+                    <span class="font-semibold text-base">Travel Planning</span>
+                </a>
+                <a href="{{ url_for('plans') }}" class="mobile-nav-link flex items-center {% if request.endpoint == 'plans' %}bg-teal-primary/20 text-teal-primary{% endif %} rounded-lg">
+                    <i class="fas fa-list-check mr-4 w-6 text-lg"></i>
+                    <span class="font-semibold text-base">My Plans</span>
+                </a>
+                <a href="{{ url_for('notes') }}" class="mobile-nav-link flex items-center {% if request.endpoint == 'notes' %}bg-teal-primary/20 text-teal-primary{% endif %} rounded-lg">
+                    <i class="fas fa-sticky-note mr-4 w-6 text-lg"></i>
+                    <span class="font-semibold text-base">Notes</span>
+                </a>
+                <a href="{{ url_for('profile') }}" class="mobile-nav-link flex items-center {% if request.endpoint == 'profile' %}bg-teal-primary/20 text-teal-primary{% endif %} rounded-lg">
+                    <i class="fas fa-user mr-4 w-6 text-lg"></i>
+                    <span class="font-semibold text-base">Profile</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <div class="toast-container fixed top-20 right-4 z-50 space-y-2">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="toast toast-{{ category }} animate-slide-in">
+                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }} mr-2"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+        
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+        
+        setTimeout(() => {
+            document.querySelectorAll('.toast').forEach(toast => {
+                toast.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => toast.remove(), 300);
+            });
+        }, 3000);
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

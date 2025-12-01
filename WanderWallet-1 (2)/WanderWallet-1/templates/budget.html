@@ -1,0 +1,911 @@
+{% extends "base.html" %}
+
+{% block title %}Budget Tracker - WanderWallet{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2">Budget Tracker</h1>
+            <p class="text-gray-400">Manage your finances with AI insights</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-calculator mr-3 text-teal-primary"></i>
+                    Enter Your Budget
+                </h2>
+                <form id="budgetForm" class="space-y-4">
+                    <div class="bg-dark-accent p-4 rounded-lg border border-teal-primary border-opacity-20 mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-calendar-alt mr-2 text-teal-primary"></i>
+                            Select Month
+                        </label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select id="selectedMonth" class="input-field">
+                                <option value="January">January</option>
+                                <option value="February">February</option>
+                                <option value="March">March</option>
+                                <option value="April">April</option>
+                                <option value="May">May</option>
+                                <option value="June">June</option>
+                                <option value="July">July</option>
+                                <option value="August">August</option>
+                                <option value="September">September</option>
+                                <option value="October">October</option>
+                                <option value="November">November</option>
+                                <option value="December">December</option>
+                            </select>
+                            <select id="selectedYear" class="input-field"></select>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Choose a month to view or edit its budget data
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Monthly Income (₹)</label>
+                        <input type="number" id="income" name="income" required step="0.01"
+                               class="input-field" placeholder="50000">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2 flex items-center justify-between">
+                            <span><i class="fas fa-home mr-2 text-blue-400"></i>Needs - Essential Expenses (₹)</span>
+                            <button type="button" id="toggleNeedsSubcategories" class="text-xs text-teal-primary hover:underline">
+                                <i class="fas fa-layer-group mr-1"></i>Breakdown
+                            </button>
+                        </label>
+                        <input type="number" id="needs" name="needs" required step="0.01"
+                               class="input-field" placeholder="25000" readonly>
+                        <p class="text-xs text-gray-500 mt-1">Calculated from subcategories below</p>
+                        
+                        <div id="needsSubcategoriesSection" class="mt-3 space-y-2 hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon needs"><i class="fas fa-home"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Rent</label>
+                                        <input type="number" data-subcategory="needs" data-name="rent" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon needs"><i class="fas fa-shopping-basket"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Groceries</label>
+                                        <input type="number" data-subcategory="needs" data-name="groceries" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon needs"><i class="fas fa-bus"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Travel to work</label>
+                                        <input type="number" data-subcategory="needs" data-name="travel_work" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon needs"><i class="fas fa-bolt"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Electricity/Water</label>
+                                        <input type="number" data-subcategory="needs" data-name="utilities" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon needs"><i class="fas fa-wifi"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Internet</label>
+                                        <input type="number" data-subcategory="needs" data-name="internet" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon needs"><i class="fas fa-gas-pump"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Fuel/Petrol</label>
+                                        <input type="number" data-subcategory="needs" data-name="fuel" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2 flex items-center justify-between">
+                            <span><i class="fas fa-shopping-cart mr-2 text-green-400"></i>Wants - Discretionary Spending (₹)</span>
+                            <button type="button" id="toggleWantsSubcategories" class="text-xs text-teal-primary hover:underline">
+                                <i class="fas fa-layer-group mr-1"></i>Breakdown
+                            </button>
+                        </label>
+                        <input type="number" id="wants" name="wants" required step="0.01"
+                               class="input-field" placeholder="10000" readonly>
+                        <p class="text-xs text-gray-500 mt-1">Calculated from subcategories below</p>
+                        
+                        <div id="wantsSubcategoriesSection" class="mt-3 space-y-2 hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon wants"><i class="fas fa-shopping-bag"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Shopping</label>
+                                        <input type="number" data-subcategory="wants" data-name="shopping" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon wants"><i class="fas fa-utensils"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Food delivery</label>
+                                        <input type="number" data-subcategory="wants" data-name="food_delivery" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon wants"><i class="fas fa-film"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Movies/Entertainment</label>
+                                        <input type="number" data-subcategory="wants" data-name="entertainment" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="subcategory-item">
+                                    <div class="subcategory-icon wants"><i class="fas fa-tv"></i></div>
+                                    <div class="flex-1">
+                                        <label class="text-xs text-gray-400">Subscriptions</label>
+                                        <input type="number" data-subcategory="wants" data-name="subscriptions" 
+                                               class="input-field text-sm py-1" placeholder="0" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            <i class="fas fa-piggy-bank mr-2 text-yellow-400"></i>Savings & Investments (₹)
+                        </label>
+                        <input type="number" id="savings" name="savings" required step="0.01"
+                               class="input-field" placeholder="15000">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary w-full" id="analyzeBtn">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Analyze Budget
+                    </button>
+                </form>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="glass-card p-6" id="insightsCard" style="display: none;">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-robot mr-3 text-purple-primary"></i>
+                        AI Insights
+                    </h2>
+                    <div id="aiInsights" class="space-y-4"></div>
+                </div>
+                
+                <div class="glass-card p-6" id="savingsGoalCard">
+                    <h2 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-bullseye mr-3 text-yellow-400"></i>
+                        Savings Goal Calculator
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Goal Amount (₹)</label>
+                                <input type="number" id="savingsGoalAmount" class="input-field" placeholder="100000" step="1000">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Target Months</label>
+                                <input type="number" id="savingsGoalMonths" class="input-field" placeholder="12" min="1">
+                            </div>
+                        </div>
+                        <button type="button" id="calculateSavingsGoal" class="btn-secondary w-full">
+                            <i class="fas fa-calculator mr-2"></i>Calculate
+                        </button>
+                        <div id="savingsGoalResult" class="hidden">
+                            <div class="bg-dark-accent p-4 rounded-lg border border-yellow-400 border-opacity-20">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-sm text-gray-400">Monthly Savings Needed</span>
+                                    <span class="text-lg font-bold text-yellow-400" id="monthlySavingsNeeded">₹0</span>
+                                </div>
+                                <div class="progress-bar-modern mb-3">
+                                    <div class="progress-fill-savings" id="savingsGoalProgress" style="width: 0%"></div>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">Progress: <span id="savingsProgressPercent">0%</span></span>
+                                    <span class="text-gray-400">Target: <span id="savingsCompletionDate">-</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="chartsSection" style="display: none;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-bold mb-4" id="pieChartTitle">Expense Distribution</h2>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-bold mb-4" id="areaChartTitle">Income vs Expense</h2>
+                    <div class="chart-container">
+                        <canvas id="areaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="glass-card p-6 mb-8" id="monthlyComparisonSection" style="display: none;">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-chart-line mr-3 text-teal-primary"></i>
+                Monthly Comparison
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="monthlyComparisonContent">
+            </div>
+        </div>
+        
+        {% if recent_budgets %}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {% for budget in recent_budgets %}
+            <div class="glass-card p-6">
+                <h3 class="text-lg font-bold mb-4">Budget Overview – {{ budget.month }} {{ budget.year }}</h3>
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="historyPieChart{{ loop.index }}"></canvas>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-700">
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-gray-400">Income:</span>
+                        <span class="text-white font-semibold">₹{{ "%.0f"|format(budget.income) }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">Savings Rate:</span>
+                        <span class="badge {% if (budget.savings / budget.income * 100) >= 30 %}badge-success{% elif (budget.savings / budget.income * 100) >= 20 %}badge-info{% else %}badge-warning{% endif %}">
+                            {{ "%.1f"|format(budget.savings / budget.income * 100) }}%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="glass-card p-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-history mr-3 text-teal-primary"></i>
+                Budget History
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="text-left py-3 px-4 text-gray-400 font-medium">Month</th>
+                            <th class="text-left py-3 px-4 text-gray-400 font-medium">Income</th>
+                            <th class="text-left py-3 px-4 text-gray-400 font-medium">Needs</th>
+                            <th class="text-left py-3 px-4 text-gray-400 font-medium">Wants</th>
+                            <th class="text-left py-3 px-4 text-gray-400 font-medium">Savings</th>
+                            <th class="text-left py-3 px-4 text-gray-400 font-medium">Savings Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for budget in budgets %}
+                        <tr class="border-b border-gray-800 hover:bg-dark-accent transition-colors">
+                            <td class="py-3 px-4">{{ budget.month }} {{ budget.year }}</td>
+                            <td class="py-3 px-4">₹{{ "%.0f"|format(budget.income) }}</td>
+                            <td class="py-3 px-4">₹{{ "%.0f"|format(budget.needs) }}</td>
+                            <td class="py-3 px-4">₹{{ "%.0f"|format(budget.wants) }}</td>
+                            <td class="py-3 px-4 text-teal-primary font-semibold">₹{{ "%.0f"|format(budget.savings) }}</td>
+                            <td class="py-3 px-4">
+                                <span class="badge {% if (budget.savings / budget.income * 100) >= 30 %}badge-success{% elif (budget.savings / budget.income * 100) >= 20 %}badge-info{% else %}badge-warning{% endif %}">
+                                    {{ "%.1f"|format(budget.savings / budget.income * 100) }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let pieChart = null;
+let areaChart = null;
+let historyCharts = [];
+
+const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 
+                   'July', 'August', 'September', 'October', 'November', 'December'];
+
+window.addEventListener('DOMContentLoaded', function() {
+    populateYearDropdown();
+    setCurrentMonthYear();
+    
+    const monthSelect = document.getElementById('selectedMonth');
+    const yearSelect = document.getElementById('selectedYear');
+    
+    monthSelect.addEventListener('change', loadBudgetData);
+    yearSelect.addEventListener('change', loadBudgetData);
+    
+    document.getElementById('toggleNeedsSubcategories').addEventListener('click', function() {
+        const section = document.getElementById('needsSubcategoriesSection');
+        section.classList.toggle('hidden');
+    });
+    
+    document.getElementById('toggleWantsSubcategories').addEventListener('click', function() {
+        const section = document.getElementById('wantsSubcategoriesSection');
+        section.classList.toggle('hidden');
+    });
+    
+    document.querySelectorAll('input[data-subcategory]').forEach(input => {
+        input.addEventListener('input', calculateTotals);
+    });
+    
+    document.getElementById('calculateSavingsGoal').addEventListener('click', calculateSavingsGoal);
+    
+    loadBudgetData();
+});
+
+function calculateTotals() {
+    const needsInputs = document.querySelectorAll('input[data-subcategory="needs"]');
+    const wantsInputs = document.querySelectorAll('input[data-subcategory="wants"]');
+    
+    let needsTotal = 0;
+    let wantsTotal = 0;
+    
+    needsInputs.forEach(input => {
+        needsTotal += parseFloat(input.value) || 0;
+    });
+    
+    wantsInputs.forEach(input => {
+        wantsTotal += parseFloat(input.value) || 0;
+    });
+    
+    const needsField = document.getElementById('needs');
+    const wantsField = document.getElementById('wants');
+    
+    needsField.value = needsTotal.toFixed(2);
+    wantsField.value = wantsTotal.toFixed(2);
+    
+    if (needsTotal > 0) {
+        needsField.setAttribute('readonly', 'readonly');
+    }
+    if (wantsTotal > 0) {
+        wantsField.setAttribute('readonly', 'readonly');
+    }
+}
+
+function calculateSavingsGoal() {
+    const goalAmount = parseFloat(document.getElementById('savingsGoalAmount').value) || 0;
+    const targetMonths = parseInt(document.getElementById('savingsGoalMonths').value) || 1;
+    const currentSavings = parseFloat(document.getElementById('savings').value) || 0;
+    
+    if (goalAmount <= 0 || targetMonths <= 0) {
+        alert('Please enter valid goal amount and target months');
+        return;
+    }
+    
+    const monthlyNeeded = goalAmount / targetMonths;
+    const currentMonthContribution = currentSavings;
+    const progressPercent = Math.min((currentMonthContribution / monthlyNeeded) * 100, 100);
+    
+    const now = new Date();
+    const completionDate = new Date(now.getFullYear(), now.getMonth() + targetMonths, 1);
+    const completionStr = monthOrder[completionDate.getMonth()] + ' ' + completionDate.getFullYear();
+    
+    document.getElementById('monthlySavingsNeeded').textContent = '₹' + monthlyNeeded.toFixed(0);
+    document.getElementById('savingsGoalProgress').style.width = progressPercent + '%';
+    document.getElementById('savingsProgressPercent').textContent = progressPercent.toFixed(1) + '%';
+    document.getElementById('savingsCompletionDate').textContent = completionStr;
+    document.getElementById('savingsGoalResult').classList.remove('hidden');
+}
+
+function populateYearDropdown() {
+    const yearSelect = document.getElementById('selectedYear');
+    const currentYear = new Date().getFullYear();
+    
+    for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) {
+            option.selected = true;
+        }
+        yearSelect.appendChild(option);
+    }
+}
+
+function setCurrentMonthYear() {
+    const now = new Date();
+    const currentMonth = monthOrder[now.getMonth()];
+    
+    document.getElementById('selectedMonth').value = currentMonth;
+    document.getElementById('selectedYear').value = now.getFullYear();
+}
+
+async function loadBudgetData() {
+    const month = document.getElementById('selectedMonth').value;
+    const year = document.getElementById('selectedYear').value;
+    
+    try {
+        const encodedMonth = encodeURIComponent(month);
+        const encodedYear = encodeURIComponent(year);
+        const response = await fetch(`/api/budgets?month=${encodedMonth}&year=${encodedYear}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            document.getElementById('income').value = result.data.income;
+            document.getElementById('savings').value = result.data.savings;
+            
+            const needsSubs = result.data.needs_subcategories || {};
+            const wantsSubs = result.data.wants_subcategories || {};
+            
+            const hasNeedsSubcategories = Object.keys(needsSubs).length > 0;
+            const hasWantsSubcategories = Object.keys(wantsSubs).length > 0;
+            
+            if (hasNeedsSubcategories) {
+                document.querySelectorAll('input[data-subcategory="needs"]').forEach(input => {
+                    const name = input.getAttribute('data-name');
+                    input.value = needsSubs[name] || 0;
+                });
+                calculateTotals();
+                document.getElementById('needs').setAttribute('readonly', 'readonly');
+            } else {
+                document.querySelectorAll('input[data-subcategory="needs"]').forEach(input => {
+                    input.value = 0;
+                });
+                document.getElementById('needs').value = result.data.needs;
+                document.getElementById('needs').removeAttribute('readonly');
+            }
+            
+            if (hasWantsSubcategories) {
+                document.querySelectorAll('input[data-subcategory="wants"]').forEach(input => {
+                    const name = input.getAttribute('data-name');
+                    input.value = wantsSubs[name] || 0;
+                });
+                calculateTotals();
+                document.getElementById('wants').setAttribute('readonly', 'readonly');
+            } else {
+                document.querySelectorAll('input[data-subcategory="wants"]').forEach(input => {
+                    input.value = 0;
+                });
+                document.getElementById('wants').value = result.data.wants;
+                document.getElementById('wants').removeAttribute('readonly');
+            }
+            
+            console.log('Loaded budget data with subcategories:', {
+                needs: needsSubs,
+                wants: wantsSubs,
+                hasNeedsSubs: hasNeedsSubcategories,
+                hasWantsSubs: hasWantsSubcategories
+            });
+            
+            if (result.insights) {
+                displayInsights(result.insights);
+            } else {
+                document.getElementById('insightsCard').style.display = 'none';
+            }
+            
+            createCharts(result.data);
+            createMonthlyComparison(month, year);
+        } else {
+            clearForm();
+            document.getElementById('insightsCard').style.display = 'none';
+            document.getElementById('chartsSection').style.display = 'none';
+            document.getElementById('monthlyComparisonSection').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error loading budget data:', error);
+        clearForm();
+        document.getElementById('insightsCard').style.display = 'none';
+        document.getElementById('chartsSection').style.display = 'none';
+        document.getElementById('monthlyComparisonSection').style.display = 'none';
+    }
+}
+
+function clearForm() {
+    document.getElementById('income').value = '';
+    document.getElementById('savings').value = '';
+    document.querySelectorAll('input[data-subcategory]').forEach(input => {
+        input.value = '';
+    });
+    calculateTotals();
+}
+
+async function createMonthlyComparison(currentMonth, currentYear) {
+    const monthIndex = monthOrder.indexOf(currentMonth);
+    let prevMonth, prevYear, nextMonth, nextYear;
+    
+    if (monthIndex === 0) {
+        prevMonth = monthOrder[11];
+        prevYear = currentYear - 1;
+    } else {
+        prevMonth = monthOrder[monthIndex - 1];
+        prevYear = currentYear;
+    }
+    
+    if (monthIndex === 11) {
+        nextMonth = monthOrder[0];
+        nextYear = currentYear + 1;
+    } else {
+        nextMonth = monthOrder[monthIndex + 1];
+        nextYear = currentYear;
+    }
+    
+    try {
+        const prevResponse = await fetch(`/api/budgets?month=${encodeURIComponent(prevMonth)}&year=${prevYear}`);
+        const prevData = await prevResponse.json();
+        const prevExpenses = prevData.success ? prevData.data.needs + prevData.data.wants : 0;
+        
+        const currResponse = await fetch(`/api/budgets?month=${encodeURIComponent(currentMonth)}&year=${currentYear}`);
+        const currData = await currResponse.json();
+        const currExpenses = currData.success ? currData.data.needs + currData.data.wants : 0;
+        
+        let html = '';
+        
+        if (prevData.success) {
+            html += `
+                <div class="month-comparison-card">
+                    <h4 class="font-semibold text-sm text-gray-400 mb-2">Previous Month</h4>
+                    <p class="text-2xl font-bold mb-2">${prevMonth}</p>
+                    <p class="text-xl text-teal-primary font-semibold">₹${prevExpenses.toFixed(0)}</p>
+                    <div class="month-bar" style="width: ${prevExpenses > 0 ? Math.min(prevExpenses / 50000 * 100, 100) : 0}%"></div>
+                </div>
+            `;
+        }
+        
+        if (currData.success) {
+            const change = prevExpenses > 0 ? ((currExpenses - prevExpenses) / prevExpenses * 100) : 0;
+            const arrow = change > 0 ? '↑' : '↓';
+            const arrowClass = change > 0 ? 'up' : 'down';
+            
+            html += `
+                <div class="month-comparison-card border-2 border-teal-primary">
+                    <h4 class="font-semibold text-sm text-gray-400 mb-2">Current Month</h4>
+                    <p class="text-2xl font-bold mb-2">${currentMonth}</p>
+                    <p class="text-xl text-teal-primary font-semibold">₹${currExpenses.toFixed(0)}</p>
+                    ${prevExpenses > 0 ? `<span class="comparison-arrow ${arrowClass}">${arrow} ${Math.abs(change).toFixed(1)}%</span>` : ''}
+                    <div class="month-bar" style="width: ${currExpenses > 0 ? Math.min(currExpenses / 50000 * 100, 100) : 0}%"></div>
+                </div>
+            `;
+            
+            const predictedExpenses = currExpenses > 0 ? currExpenses * 1.05 : 0;
+            const predictedChange = currExpenses > 0 ? ((predictedExpenses - currExpenses) / currExpenses * 100) : 0;
+            const predictedArrow = predictedChange > 0 ? '↑' : '↓';
+            const predictedArrowClass = predictedChange > 0 ? 'up' : 'down';
+            
+            html += `
+                <div class="month-comparison-card">
+                    <h4 class="font-semibold text-sm text-gray-400 mb-2">Next Month (Predicted)</h4>
+                    <p class="text-2xl font-bold mb-2">${nextMonth}</p>
+                    <p class="text-xl text-purple-400 font-semibold">₹${predictedExpenses.toFixed(0)}</p>
+                    ${currExpenses > 0 ? `<span class="comparison-arrow ${predictedArrowClass}">${predictedArrow} ${Math.abs(predictedChange).toFixed(1)}%</span>` : ''}
+                    <div class="month-bar" style="width: ${predictedExpenses > 0 ? Math.min(predictedExpenses / 50000 * 100, 100) : 0}%"></div>
+                </div>
+            `;
+        }
+        
+        if (html) {
+            document.getElementById('monthlyComparisonContent').innerHTML = html;
+            document.getElementById('monthlyComparisonSection').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error creating monthly comparison:', error);
+    }
+}
+
+{% if recent_budgets %}
+window.addEventListener('DOMContentLoaded', function() {
+    {% for budget in recent_budgets %}
+    const ctx{{ loop.index }} = document.getElementById('historyPieChart{{ loop.index }}').getContext('2d');
+    historyCharts.push(new Chart(ctx{{ loop.index }}, {
+        type: 'doughnut',
+        data: {
+            labels: ['Needs', 'Wants', 'Savings'],
+            datasets: [{
+                data: [{{ budget.needs }}, {{ budget.wants }}, {{ budget.savings }}],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(251, 191, 36, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(59, 130, 246)',
+                    'rgb(16, 185, 129)',
+                    'rgb(251, 191, 36)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#cbd5e1',
+                        font: {
+                            size: 10,
+                            family: 'Poppins'
+                        }
+                    }
+                }
+            }
+        }
+    }));
+    {% endfor %}
+});
+{% endif %}
+
+document.getElementById('budgetForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const btn = document.getElementById('analyzeBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner mr-2"></span>Analyzing...';
+    
+    const month = document.getElementById('selectedMonth').value;
+    const year = document.getElementById('selectedYear').value;
+    const income = document.getElementById('income').value;
+    const needs = document.getElementById('needs').value;
+    const wants = document.getElementById('wants').value;
+    const savings = document.getElementById('savings').value;
+    
+    const needsSubcategories = {};
+    document.querySelectorAll('input[data-subcategory="needs"]').forEach(input => {
+        const name = input.getAttribute('data-name');
+        const value = parseFloat(input.value) || 0;
+        needsSubcategories[name] = value;
+    });
+    
+    const wantsSubcategories = {};
+    document.querySelectorAll('input[data-subcategory="wants"]').forEach(input => {
+        const name = input.getAttribute('data-name');
+        const value = parseFloat(input.value) || 0;
+        wantsSubcategories[name] = value;
+    });
+    
+    const needsSubcategoriesJSON = JSON.stringify(needsSubcategories);
+    const wantsSubcategoriesJSON = JSON.stringify(wantsSubcategories);
+    
+    console.log('=== SUBMITTING BUDGET DATA ===');
+    console.log('Needs subcategories object:', needsSubcategories);
+    console.log('Needs subcategories JSON:', needsSubcategoriesJSON);
+    console.log('Wants subcategories object:', wantsSubcategories);
+    console.log('Wants subcategories JSON:', wantsSubcategoriesJSON);
+    
+    const formData = new FormData();
+    formData.set('month', month);
+    formData.set('year', year);
+    formData.set('income', income);
+    formData.set('needs', needs);
+    formData.set('wants', wants);
+    formData.set('savings', savings);
+    formData.set('needs_subcategories', needsSubcategoriesJSON);
+    formData.set('wants_subcategories', wantsSubcategoriesJSON);
+    
+    console.log('FormData entries:');
+    for (const [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+    }
+    
+    try {
+        const response = await fetch('/budget', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        console.log('Server response:', result);
+        
+        if (result.success) {
+            console.log('✓ Budget saved successfully');
+            displayInsights(result.insights);
+            createCharts(result.data);
+            createMonthlyComparison(month, year);
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            console.error('× Failed to save budget:', result.error);
+            alert('Failed to save budget: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('× Error submitting budget:', error);
+        alert('Failed to analyze budget. Please try again.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-chart-line mr-2"></i>Analyze Budget';
+    }
+});
+
+function displayInsights(insights) {
+    const card = document.getElementById('insightsCard');
+    const container = document.getElementById('aiInsights');
+    
+    let html = `
+        <div class="feature-card mb-4">
+            <h3 class="font-semibold text-white mb-2 flex items-center">
+                <i class="fas fa-brain text-purple-primary mr-2"></i>
+                Summary
+            </h3>
+            <p class="text-gray-300">${insights.summary}</p>
+        </div>
+    `;
+    
+    if (insights.tips && insights.tips.length > 0) {
+        html += '<div class="space-y-3">';
+        insights.tips.forEach((tip, index) => {
+            html += `
+                <div class="feature-card">
+                    <div class="flex items-start">
+                        <i class="fas fa-lightbulb text-yellow-400 mr-3 mt-1"></i>
+                        <p class="text-gray-300 text-sm">${tip}</p>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+    
+    container.innerHTML = html;
+    card.style.display = 'block';
+    card.classList.add('fade-in');
+}
+
+function createCharts(data) {
+    const section = document.getElementById('chartsSection');
+    section.style.display = 'block';
+    section.classList.add('fade-in');
+    
+    const month = document.getElementById('selectedMonth').value;
+    const year = document.getElementById('selectedYear').value;
+    
+    document.getElementById('pieChartTitle').textContent = `Expense Distribution – ${month} ${year}`;
+    document.getElementById('areaChartTitle').textContent = `Income vs Expense – ${month} ${year}`;
+    
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const areaCtx = document.getElementById('areaChart').getContext('2d');
+    
+    if (pieChart) pieChart.destroy();
+    if (areaChart) areaChart.destroy();
+    
+    pieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Needs', 'Wants', 'Savings'],
+            datasets: [{
+                data: [data.needs, data.wants, data.savings],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(251, 191, 36, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(59, 130, 246)',
+                    'rgb(16, 185, 129)',
+                    'rgb(251, 191, 36)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#cbd5e1',
+                        font: {
+                            size: 12,
+                            family: 'Poppins'
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return label + ': ₹' + value.toFixed(0);
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    const totalExpenses = data.needs + data.wants;
+    areaChart = new Chart(areaCtx, {
+        type: 'line',
+        data: {
+            labels: ['Income', 'Expenses', 'Savings'],
+            datasets: [{
+                label: 'Amount (₹)',
+                data: [data.income, totalExpenses, data.savings],
+                fill: true,
+                backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                borderColor: 'rgb(0, 217, 255)',
+                borderWidth: 3,
+                tension: 0.4,
+                pointBackgroundColor: 'rgb(0, 217, 255)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#cbd5e1',
+                        font: {
+                            size: 12,
+                            family: 'Poppins'
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Amount: ₹' + context.parsed.y.toFixed(0);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#cbd5e1',
+                        font: {
+                            family: 'Poppins'
+                        },
+                        callback: function(value) {
+                            return '₹' + value.toFixed(0);
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#cbd5e1',
+                        font: {
+                            family: 'Poppins'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

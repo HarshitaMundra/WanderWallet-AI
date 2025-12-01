@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - WanderWallet{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-6 md:mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 text-white">Profile</h1>
+            <p class="text-gray-400 text-base md:text-lg">Manage your account and view statistics</p>
+        </div>
+        
+        <div class="glass-card p-5 sm:p-6 md:p-8 mb-6 md:mb-8">
+            <div class="flex flex-col items-center sm:flex-row sm:items-start">
+                <div class="profile-avatar w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-r from-teal-primary to-purple-primary flex items-center justify-center text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-0 sm:mr-6 shadow-lg">
+                    {{ user.username[0]|upper }}
+                </div>
+                <div class="text-center sm:text-left flex-1 w-full">
+                    <h2 class="text-2xl sm:text-2xl md:text-3xl font-bold text-white mb-2 md:mb-3">{{ user.username }}</h2>
+                    <p class="text-gray-300 text-lg sm:text-lg md:text-xl break-all mb-2 font-medium">{{ user.email }}</p>
+                    <p class="text-base text-gray-400 mt-2 font-normal">
+                        <i class="fas fa-calendar mr-2"></i>
+                        Joined {{ user.created_at[:10] }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6 mb-6 md:mb-8">
+            <div class="stat-card">
+                <div class="icon-badge mb-4">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <h3 class="text-gray-300 text-base md:text-sm mb-2 font-semibold">Total Budgets</h3>
+                <p class="text-3xl md:text-4xl font-bold text-white">{{ total_budgets }}</p>
+            </div>
+            
+            <div class="stat-card">
+                <div class="icon-badge mb-4" style="color: #a855f7">
+                    <i class="fas fa-plane"></i>
+                </div>
+                <h3 class="text-gray-300 text-base md:text-sm mb-2 font-semibold">Travel Plans</h3>
+                <p class="text-3xl md:text-4xl font-bold text-white">{{ total_trips }}</p>
+            </div>
+            
+            <div class="stat-card">
+                <div class="icon-badge mb-4" style="color: #10b981">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <h3 class="text-gray-300 text-base md:text-sm mb-2 font-semibold">Total Saved</h3>
+                <p class="text-3xl md:text-4xl font-bold text-white">₹{{ "%.0f"|format(total_saved) }}</p>
+            </div>
+        </div>
+        
+        <div class="glass-card p-5 sm:p-6 md:p-7 mb-6 md:mb-8">
+            <h2 class="text-xl sm:text-2xl md:text-2xl font-bold mb-5 flex items-center text-white">
+                <i class="fas fa-cog mr-3 text-teal-primary text-xl md:text-2xl"></i>
+                Account Settings
+            </h2>
+            <div class="space-y-4 md:space-y-5">
+                <div class="feature-card">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white text-lg md:text-xl mb-2">Email</h3>
+                            <p class="text-base md:text-lg text-gray-300 break-all font-medium" id="currentEmail">{{ user.email }}</p>
+                        </div>
+                        <button class="btn-secondary text-base md:text-lg px-5 py-3 w-full min-h-[52px]" onclick="openEditEmailModal()">
+                            <i class="fas fa-edit mr-2"></i>Edit Email
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white text-lg md:text-xl mb-2">Password</h3>
+                            <p class="text-base md:text-lg text-gray-300 font-medium">••••••••</p>
+                        </div>
+                        <button class="btn-secondary text-base md:text-lg px-5 py-3 w-full min-h-[52px]" onclick="openChangePasswordModal()">
+                            <i class="fas fa-key mr-2"></i>Change Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mb-6 md:mb-8 px-2">
+            <a href="{{ url_for('logout') }}" class="inline-flex w-full sm:w-auto px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl min-h-[56px] items-center justify-center">
+                <i class="fas fa-sign-out-alt mr-2 text-xl"></i>Logout
+            </a>
+        </div>
+        
+        <div id="editEmailModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4" onclick="closeModalOnBackdrop(event, 'editEmailModal')">
+            <div class="bg-dark-secondary rounded-xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-teal-primary/20" onclick="event.stopPropagation()">
+                <h3 class="text-2xl md:text-2xl font-bold mb-5 text-white">Edit Email</h3>
+                <form id="editEmailForm" onsubmit="updateEmail(event)">
+                    <div class="mb-5">
+                        <label class="block text-base md:text-lg font-semibold text-gray-300 mb-3">New Email Address</label>
+                        <input type="email" id="newEmail" required 
+                               class="input-field text-base md:text-lg" placeholder="Enter your new email">
+                    </div>
+                    <div class="flex flex-col gap-3 mt-6">
+                        <button type="submit" class="btn-primary text-base md:text-lg py-3 min-h-[52px]" id="updateEmailBtn">
+                            <i class="fas fa-save mr-2"></i>Save Changes
+                        </button>
+                        <button type="button" class="btn-secondary text-base md:text-lg py-3 min-h-[52px]" onclick="closeEditEmailModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div id="changePasswordModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4" onclick="closeModalOnBackdrop(event, 'changePasswordModal')">
+            <div class="bg-dark-secondary rounded-xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-teal-primary/20" onclick="event.stopPropagation()">
+                <h3 class="text-2xl md:text-2xl font-bold mb-5 text-white">Change Password</h3>
+                <form id="changePasswordForm" onsubmit="updatePassword(event)">
+                    <div class="mb-5">
+                        <label class="block text-base md:text-lg font-semibold text-gray-300 mb-3">Current Password</label>
+                        <input type="password" id="currentPassword" required 
+                               class="input-field text-base md:text-lg" placeholder="Enter current password">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-base md:text-lg font-semibold text-gray-300 mb-3">New Password</label>
+                        <input type="password" id="newPassword" required minlength="6"
+                               class="input-field text-base md:text-lg" placeholder="Enter new password (min 6 characters)">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-base md:text-lg font-semibold text-gray-300 mb-3">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" required minlength="6"
+                               class="input-field text-base md:text-lg" placeholder="Re-enter new password">
+                    </div>
+                    <div class="flex flex-col gap-3 mt-6">
+                        <button type="submit" class="btn-primary text-base md:text-lg py-3 min-h-[52px]" id="updatePasswordBtn">
+                            <i class="fas fa-save mr-2"></i>Update Password
+                        </button>
+                        <button type="button" class="btn-secondary text-base md:text-lg py-3 min-h-[52px]" onclick="closeChangePasswordModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openEditEmailModal() {
+    document.getElementById('editEmailModal').classList.remove('hidden');
+    document.getElementById('editEmailModal').classList.add('flex');
+}
+
+function closeEditEmailModal() {
+    document.getElementById('editEmailModal').classList.add('hidden');
+    document.getElementById('editEmailModal').classList.remove('flex');
+}
+
+function openChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.remove('hidden');
+    document.getElementById('changePasswordModal').classList.add('flex');
+}
+
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.add('hidden');
+    document.getElementById('changePasswordModal').classList.remove('flex');
+    document.getElementById('changePasswordForm').reset();
+}
+
+function closeModalOnBackdrop(event, modalId) {
+    if (event.target.id === modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        document.getElementById(modalId).classList.remove('flex');
+    }
+}
+
+async function updateEmail(event) {
+    event.preventDefault();
+    const btn = document.getElementById('updateEmailBtn');
+    const newEmail = document.getElementById('newEmail').value;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner mr-2"></span>Updating...';
+    
+    try {
+        const response = await fetch('/profile/update-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: newEmail })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            document.getElementById('currentEmail').textContent = newEmail;
+            closeEditEmailModal();
+            showToast('Email updated successfully!', 'success');
+            document.getElementById('editEmailForm').reset();
+        } else {
+            showToast(result.message || 'Failed to update email', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save mr-2"></i>Save Changes';
+    }
+}
+
+async function updatePassword(event) {
+    event.preventDefault();
+    const btn = document.getElementById('updatePasswordBtn');
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (newPassword !== confirmPassword) {
+        showToast('New passwords do not match', 'error');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner mr-2"></span>Updating...';
+    
+    try {
+        const response = await fetch('/profile/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                current_password: currentPassword,
+                new_password: newPassword 
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            closeChangePasswordModal();
+            showToast('Password changed successfully!', 'success');
+        } else {
+            showToast(result.message || 'Failed to change password', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save mr-2"></i>Update Password';
+    }
+}
+
+function showToast(message, type) {
+    const toastContainer = document.querySelector('.toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type} animate-slide-in`;
+    
+    const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+    toast.innerHTML = `<i class="fas fa-${icon} mr-2"></i>${message}`;
+    
+    toastContainer.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease-out forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Accommodations & Attractions - WanderWallet{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-6">
+            <a href="{{ url_for('travel') }}" class="text-gray-400 hover:text-teal-primary transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Travel Planner
+            </a>
+        </div>
+        
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2">{{ plan.destination }} Travel Guide</h1>
+            <p class="text-gray-400">{{ plan.start_city }} → {{ plan.destination }} • {{ plan.travel_days }} days • {{ plan.travel_month }}</p>
+        </div>
+        
+        {% if destination_images and destination_images|length > 0 %}
+        <div class="glass-card mb-8 overflow-hidden">
+            <div class="h-64 relative">
+                <img src="{{ destination_images[0].url }}" alt="{{ plan.destination }}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-dark-primary to-transparent"></div>
+                <div class="absolute bottom-0 left-0 p-6">
+                    <h2 class="text-3xl font-bold text-white">{{ plan.destination }}</h2>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="glass-card p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-hotel mr-3 text-teal-primary"></i>
+                Best Accommodations
+            </h2>
+            <div class="card-grid">
+                {% for hotel in accommodations %}
+                <div class="feature-card">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-white text-lg">{{ hotel.name }}</h3>
+                            <span class="badge badge-info mt-1">{{ hotel.type }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span class="text-white font-semibold">{{ hotel.rating }}</span>
+                        </div>
+                    </div>
+                    <p class="text-2xl font-bold text-teal-primary mb-2">₹{{ hotel.price }}<span class="text-sm text-gray-400">/night</span></p>
+                    <p class="text-sm text-gray-400">
+                        {{ plan.travel_days }} nights total: <span class="text-white font-semibold">₹{{ hotel.price * plan.travel_days }}</span>
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="glass-card p-6">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-map-marked-alt mr-3 text-purple-primary"></i>
+                Top Tourist Spots
+            </h2>
+            <div class="card-grid">
+                {% for spot in tourist_spots %}
+                <div class="feature-card overflow-hidden">
+                    {% if tourist_images and loop.index0 < tourist_images|length %}
+                    <div class="h-40 mb-3 -mx-4 -mt-4">
+                        <img src="{{ tourist_images[loop.index0].url }}" alt="{{ spot.name }}" class="w-full h-full object-cover">
+                    </div>
+                    {% endif %}
+                    <div class="flex items-start mb-3">
+                        <div class="icon-badge mr-3" style="width: 2.5rem; height: 2.5rem; font-size: 1.25rem;">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-white">{{ spot.name }}</h3>
+                            <p class="text-sm text-gray-400 mt-1">{{ spot.description }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-gray-700">
+                        <p class="text-sm">
+                            {% if spot.entry_fee == 0 %}
+                            <span class="badge badge-success">Free Entry</span>
+                            {% else %}
+                            <span class="text-gray-400">Entry Fee:</span> 
+                            <span class="text-teal-primary font-semibold">₹{{ spot.entry_fee }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('plans') }}" class="btn-primary">
+                <i class="fas fa-list-check mr-2"></i>
+                View All Plans
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

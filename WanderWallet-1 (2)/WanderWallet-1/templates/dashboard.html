@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - WanderWallet{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">
+                    Welcome back, <span class="bg-gradient-to-r from-teal-primary to-purple-primary bg-clip-text text-transparent">{{ current_user.username }}!</span>
+                </h1>
+                <p class="text-gray-400">Your complete financial and travel summary</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-teal-primary to-purple-primary flex items-center justify-center text-xl font-bold text-white">
+                    {{ current_user.username[0]|upper }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card fade-in" style="animation-delay: 0.1s">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="icon-badge">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <span class="text-xs text-gray-400">This Month</span>
+                </div>
+                <h3 class="text-gray-400 text-sm font-medium mb-1">Total Income</h3>
+                <p class="text-2xl font-bold text-white">₹{{ "%.0f"|format(monthly_income) }}</p>
+                <div class="mt-2 text-xs {% if income_change >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                    <i class="fas fa-arrow-{% if income_change >= 0 %}up{% else %}down{% endif %} mr-1"></i>
+                    {{ "%.1f"|format(income_change|abs) }}% from last month
+                </div>
+            </div>
+            
+            <div class="stat-card fade-in" style="animation-delay: 0.2s">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="icon-badge" style="color: #f59e0b">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <span class="text-xs text-gray-400">This Month</span>
+                </div>
+                <h3 class="text-gray-400 text-sm font-medium mb-1">Total Expenses</h3>
+                <p class="text-2xl font-bold text-white">₹{{ "%.0f"|format(monthly_expenses) }}</p>
+                <div class="mt-2 text-xs text-gray-400">
+                    {{ "%.1f"|format((monthly_expenses / monthly_income * 100) if monthly_income > 0 else 0) }}% of income
+                </div>
+            </div>
+            
+            <div class="stat-card fade-in" style="animation-delay: 0.3s">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="icon-badge" style="color: #10b981">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <span class="text-xs text-gray-400">This Month</span>
+                </div>
+                <h3 class="text-gray-400 text-sm font-medium mb-1">Total Savings</h3>
+                <p class="text-2xl font-bold text-white">₹{{ "%.0f"|format(monthly_savings) }}</p>
+                <div class="mt-2">
+                    <span class="badge {% if savings_rate >= 30 %}badge-success{% elif savings_rate >= 20 %}badge-info{% else %}badge-warning{% endif %}">
+                        {{ "%.1f"|format(savings_rate) }}% rate
+                    </span>
+                </div>
+            </div>
+            
+            <div class="stat-card fade-in" style="animation-delay: 0.4s">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="icon-badge" style="color: #a855f7">
+                        <i class="fas fa-plane"></i>
+                    </div>
+                    <span class="text-xs text-gray-400">Upcoming</span>
+                </div>
+                <h3 class="text-gray-400 text-sm font-medium mb-1">Next Trip</h3>
+                {% if next_trip %}
+                <p class="text-lg font-bold text-white truncate">{{ next_trip.destination }}</p>
+                <div class="mt-2 text-xs text-purple-primary">
+                    <i class="fas fa-calendar mr-1"></i>{{ next_trip.travel_month }}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500">No trips planned</p>
+                <a href="{{ url_for('travel') }}" class="text-xs text-teal-primary hover:text-teal-secondary mt-1 inline-block">
+                    Plan a trip →
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="glass-card p-6 fade-in" style="animation-delay: 0.5s">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-chart-pie mr-3 text-teal-primary"></i>
+                    Monthly Expense Distribution
+                </h2>
+                <div class="chart-container" style="height: 280px">
+                    <canvas id="expensePieChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="glass-card p-6 fade-in" style="animation-delay: 0.6s">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-purple-primary"></i>
+                    Monthly Financial Overview
+                </h2>
+                <div class="chart-container" style="height: 280px">
+                    <canvas id="trendLineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        {% if next_trip %}
+        <div class="glass-card p-6 mb-8 fade-in" style="animation-delay: 0.7s">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-map-marked-alt mr-3 text-teal-primary"></i>
+                Next Planned Trip: {{ next_trip.destination }}
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="feature-card">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-calendar text-teal-primary text-2xl mr-3"></i>
+                        <div>
+                            <h3 class="text-sm text-gray-400">Travel Month</h3>
+                            <p class="text-lg font-bold text-white">{{ next_trip.travel_month }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-clock text-purple-primary text-2xl mr-3"></i>
+                        <div>
+                            <h3 class="text-sm text-gray-400">Duration</h3>
+                            <p class="text-lg font-bold text-white">{{ next_trip.travel_days }} Days</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-wallet text-yellow-400 text-2xl mr-3"></i>
+                        <div>
+                            <h3 class="text-sm text-gray-400">Estimated Budget</h3>
+                            <p class="text-lg font-bold text-white">₹{{ "%.0f"|format(next_trip.total_budget) if next_trip.total_budget else 0 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <button id="trainBtn" class="btn-secondary flex items-center justify-center" onclick="fetchSpecificTravelOption('train')">
+                    <i class="fas fa-train mr-2"></i>View Train Options
+                </button>
+                <button id="busBtn" class="btn-secondary flex items-center justify-center" onclick="fetchSpecificTravelOption('bus')">
+                    <i class="fas fa-bus mr-2"></i>View Bus Options
+                </button>
+                <button id="carBtn" class="btn-secondary flex items-center justify-center" onclick="fetchSpecificTravelOption('car')">
+                    <i class="fas fa-car mr-2"></i>View Car Route
+                </button>
+            </div>
+            
+            <div id="travelOptionsContainer" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-white" id="travelOptionsTitle">Travel Options</h3>
+                    <button onclick="hideTravelOptions()" class="btn-secondary text-sm py-2 px-4">
+                        <i class="fas fa-times mr-2"></i>Close
+                    </button>
+                </div>
+                <div id="travelOptionsContent" class="grid grid-cols-1 gap-4">
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-images mr-2 text-purple-primary"></i>
+                    Destination Preview
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {% for image in destination_images %}
+                    <div class="feature-card overflow-hidden p-0">
+                        <img src="{{ image }}" alt="Destination" class="w-full h-32 object-cover hover:scale-110 transition-transform duration-300">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-card p-6 fade-in" style="animation-delay: 0.8s">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-history mr-3 text-teal-primary"></i>
+                    Recent Budgets
+                </h2>
+                {% if recent_budgets %}
+                <div class="space-y-3">
+                    {% for budget in recent_budgets %}
+                    <div class="transport-card">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-semibold text-white">{{ budget.month }} {{ budget.year }}</h3>
+                                <p class="text-sm text-gray-400">Savings: ₹{{ "%.0f"|format(budget.savings) }}</p>
+                            </div>
+                            <span class="badge {% if (budget.savings / budget.income * 100) >= 30 %}badge-success{% elif (budget.savings / budget.income * 100) >= 20 %}badge-info{% else %}badge-warning{% endif %}">
+                                {{ "%.1f"|format(budget.savings / budget.income * 100) }}%
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-chart-pie text-4xl text-gray-600 mb-3"></i>
+                    <p class="text-gray-400 mb-3">No budget history yet</p>
+                    <a href="{{ url_for('budget') }}" class="btn-primary inline-flex">
+                        <i class="fas fa-plus mr-2"></i>Create Budget
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="glass-card p-6 fade-in" style="animation-delay: 0.9s">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-sticky-note mr-3 text-purple-primary"></i>
+                        Quick Notes
+                    </h2>
+                    <a href="{{ url_for('notes') }}" class="text-xs text-teal-primary hover:text-teal-secondary">
+                        View All →
+                    </a>
+                </div>
+                
+                <div class="mb-4">
+                    <form id="quickNoteForm" class="space-y-2">
+                        <input type="text" id="quickNoteTitle" placeholder="Note title..." class="w-full px-3 py-2 bg-dark-secondary border border-teal-primary border-opacity-20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-primary focus:border-opacity-50 text-sm">
+                        <textarea id="quickNoteContent" placeholder="Write your note..." class="w-full px-3 py-2 bg-dark-secondary border border-teal-primary border-opacity-20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-primary focus:border-opacity-50 text-sm resize-none" rows="2"></textarea>
+                        <button type="submit" class="btn-primary w-full text-sm py-2">
+                            <i class="fas fa-plus mr-2"></i>Add Note
+                        </button>
+                    </form>
+                </div>
+
+                {% if recent_notes %}
+                <div class="space-y-2" id="recentNotesList">
+                    {% for note in recent_notes %}
+                    <div class="bg-dark-secondary bg-opacity-50 p-3 rounded-lg border border-purple-primary border-opacity-20 hover:border-opacity-40 transition-all">
+                        <h3 class="font-semibold text-white text-sm">{{ note.title }}</h3>
+                        <p class="text-xs text-gray-400 mt-1 line-clamp-2">{{ note.content }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ note.updated_at }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-6">
+                    <i class="fas fa-sticky-note text-3xl text-gray-600 mb-2"></i>
+                    <p class="text-gray-400 text-sm">No notes yet. Create one above!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const monthlyData = {{ monthly_data|tojson }};
+
+document.getElementById('quickNoteForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const title = document.getElementById('quickNoteTitle').value.trim();
+    const content = document.getElementById('quickNoteContent').value.trim();
+    
+    if (!title || !content) {
+        alert('Please fill in both title and content');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/notes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ title, content })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            document.getElementById('quickNoteTitle').value = '';
+            document.getElementById('quickNoteContent').value = '';
+            
+            const notesList = document.getElementById('recentNotesList');
+            const newNoteHtml = `
+                <div class="bg-dark-secondary bg-opacity-50 p-3 rounded-lg border border-purple-primary border-opacity-20 hover:border-opacity-40 transition-all">
+                    <h3 class="font-semibold text-white text-sm">${result.note.title}</h3>
+                    <p class="text-xs text-gray-400 mt-1 line-clamp-2">${result.note.content}</p>
+                    <p class="text-xs text-gray-500 mt-1">${result.note.created_at}</p>
+                </div>
+            `;
+            
+            if (notesList) {
+                notesList.insertAdjacentHTML('afterbegin', newNoteHtml);
+                const notes = notesList.children;
+                if (notes.length > 3) {
+                    notes[notes.length - 1].remove();
+                }
+            } else {
+                location.reload();
+            }
+        } else {
+            alert(result.message || 'Failed to create note');
+        }
+    } catch (error) {
+        console.error('Error creating note:', error);
+        alert('An error occurred while creating the note');
+    }
+});
+
+const pieCtx = document.getElementById('expensePieChart').getContext('2d');
+new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Needs', 'Wants', 'Savings'],
+        datasets: [{
+            data: [{{ monthly_needs }}, {{ monthly_wants }}, {{ monthly_savings }}],
+            backgroundColor: [
+                'rgba(251, 191, 36, 0.8)',
+                'rgba(168, 85, 247, 0.8)',
+                'rgba(20, 184, 166, 0.8)'
+            ],
+            borderColor: [
+                'rgb(251, 191, 36)',
+                'rgb(168, 85, 247)',
+                'rgb(20, 184, 166)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#cbd5e1',
+                    font: { size: 12, family: 'Poppins' }
+                }
+            }
+        }
+    }
+});
+
+const lineCtx = document.getElementById('trendLineChart').getContext('2d');
+new Chart(lineCtx, {
+    type: 'bar',
+    data: {
+        labels: monthlyData.months,
+        datasets: [
+            {
+                label: 'Income',
+                data: monthlyData.income,
+                backgroundColor: 'rgba(20, 184, 166, 0.8)',
+                borderColor: 'rgb(20, 184, 166)',
+                borderWidth: 2
+            },
+            {
+                label: 'Expenses',
+                data: monthlyData.expenses,
+                backgroundColor: 'rgba(251, 191, 36, 0.8)',
+                borderColor: 'rgb(251, 191, 36)',
+                borderWidth: 2
+            },
+            {
+                label: 'Savings',
+                data: monthlyData.savings,
+                backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                borderColor: 'rgb(168, 85, 247)',
+                borderWidth: 2
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#cbd5e1',
+                    font: { size: 11, family: 'Poppins' }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: '#cbd5e1',
+                    font: { family: 'Poppins' }
+                },
+                grid: { color: 'rgba(148, 163, 184, 0.1)' }
+            },
+            x: {
+                ticks: {
+                    color: '#cbd5e1',
+                    font: { family: 'Poppins' }
+                },
+                grid: { color: 'rgba(148, 163, 184, 0.1)' }
+            }
+        }
+    }
+});
+
+{% if next_trip %}
+const nextTrip = {
+    startCity: '{{ next_trip.start_city }}',
+    destination: '{{ next_trip.destination }}',
+    days: {{ next_trip.travel_days }},
+    month: '{{ next_trip.travel_month }}'
+};
+
+async function fetchSpecificTravelOption(type) {
+    const container = document.getElementById('travelOptionsContainer');
+    const content = document.getElementById('travelOptionsContent');
+    const title = document.getElementById('travelOptionsTitle');
+    
+    const typeNames = {
+        'train': 'Train Options',
+        'bus': 'Bus Options',
+        'car': 'Car Route'
+    };
+    
+    title.textContent = typeNames[type] || 'Travel Options';
+    content.innerHTML = '<div class="text-center text-gray-400"><i class="fas fa-spinner fa-spin text-3xl"></i><p class="mt-2">Fetching travel options...</p></div>';
+    container.classList.remove('hidden');
+    
+    try {
+        const response = await fetch('/api/travel-options', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                from: nextTrip.startCity,
+                to: nextTrip.destination,
+                days: nextTrip.days,
+                month: nextTrip.month
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            displaySpecificTravelOption(result.data, type);
+        } else {
+            content.innerHTML = '<div class="text-center text-red-400"><i class="fas fa-exclamation-circle text-3xl"></i><p class="mt-2">Unable to fetch travel options. Please try again.</p></div>';
+        }
+    } catch (error) {
+        console.error('Error fetching travel options:', error);
+        content.innerHTML = '<div class="text-center text-red-400"><i class="fas fa-exclamation-circle text-3xl"></i><p class="mt-2">An error occurred. Please try again later.</p></div>';
+    }
+}
+
+function displaySpecificTravelOption(data, type) {
+    const content = document.getElementById('travelOptionsContent');
+    let html = '';
+    
+    if (type === 'train' && data.train_options && data.train_options.length > 0) {
+        html += '<div class="feature-card"><h4 class="text-white font-bold mb-3 flex items-center"><i class="fas fa-train mr-2 text-teal-primary"></i>Available Train Options</h4><div class="space-y-3">';
+        data.train_options.forEach(train => {
+            html += `<div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg border border-teal-primary border-opacity-20 hover:border-opacity-40 transition-all">
+                <p class="text-white font-semibold text-lg">${train.name}</p>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <p class="text-sm text-gray-300"><i class="fas fa-clock mr-1 text-teal-primary"></i>Duration: ${train.duration}</p>
+                    <p class="text-sm text-gray-300"><i class="fas fa-chair mr-1 text-teal-primary"></i>Class: ${train.class}</p>
+                </div>
+                <p class="text-teal-primary font-bold text-xl mt-2">₹${train.price}</p>
+            </div>`;
+        });
+        html += '</div></div>';
+    } else if (type === 'bus' && data.bus_options && data.bus_options.length > 0) {
+        html += '<div class="feature-card"><h4 class="text-white font-bold mb-3 flex items-center"><i class="fas fa-bus mr-2 text-purple-primary"></i>Available Bus Options</h4><div class="space-y-3">';
+        data.bus_options.forEach(bus => {
+            html += `<div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg border border-purple-primary border-opacity-20 hover:border-opacity-40 transition-all">
+                <p class="text-white font-semibold text-lg">${bus.name}</p>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <p class="text-sm text-gray-300"><i class="fas fa-clock mr-1 text-purple-primary"></i>Duration: ${bus.duration}</p>
+                    <p class="text-sm text-gray-300"><i class="fas fa-building mr-1 text-purple-primary"></i>${bus.operator}</p>
+                </div>
+                <p class="text-purple-primary font-bold text-xl mt-2">₹${bus.price}</p>
+            </div>`;
+        });
+        html += '</div></div>';
+    } else if (type === 'car' && data.car_route) {
+        html += '<div class="feature-card"><h4 class="text-white font-bold mb-3 flex items-center"><i class="fas fa-car mr-2 text-yellow-400"></i>Car/Self-Drive Route</h4><div class="space-y-3">';
+        html += `<div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg border border-yellow-400 border-opacity-20 hover:border-opacity-40 transition-all">
+            <p class="text-white font-semibold text-lg">Self Drive Option</p>
+            <div class="grid grid-cols-2 gap-3 mt-3">
+                <p class="text-sm text-gray-300"><i class="fas fa-road mr-1 text-yellow-400"></i>Distance: ${data.car_route.distance}</p>
+                <p class="text-sm text-gray-300"><i class="fas fa-clock mr-1 text-yellow-400"></i>Duration: ${data.car_route.duration}</p>
+                <p class="text-sm text-gray-300"><i class="fas fa-gas-pump mr-1 text-yellow-400"></i>Fuel Cost: ₹${data.car_route.fuel_cost}</p>
+                <p class="text-sm text-gray-300"><i class="fas fa-coins mr-1 text-yellow-400"></i>Toll Charges: ₹${data.car_route.toll}</p>
+            </div>
+            <p class="text-yellow-400 font-bold text-xl mt-3">Total Cost: ₹${data.car_route.fuel_cost + data.car_route.toll}</p>
+        </div>`;
+        html += '</div></div>';
+    }
+    
+    if (!html) {
+        html = '<div class="text-center text-gray-400"><p>No travel options available at the moment.</p></div>';
+    }
+    
+    content.innerHTML = html;
+}
+
+function hideTravelOptions() {
+    const container = document.getElementById('travelOptionsContainer');
+    container.classList.add('hidden');
+}
+{% endif %}
+</script>
+{% endblock %}

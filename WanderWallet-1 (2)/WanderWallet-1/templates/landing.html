@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}WanderWallet - Smart Budget & Travel Planning{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-black relative overflow-hidden">
+    <!-- Animated background gradient -->
+    <div class="absolute inset-0 bg-gradient-to-br from-teal-primary/5 via-transparent to-purple-primary/5"></div>
+    <div class="absolute inset-0" style="background-image: radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(183, 148, 246, 0.08) 0%, transparent 50%);"></div>
+    <div class="relative z-10">
+    
+    <!-- Hero Banner Section -->
+    <section class="relative py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center fade-in">
+                <div class="mb-6">
+                    <span class="inline-block px-5 py-2.5 rounded-full bg-gradient-to-r from-teal-primary/20 to-purple-primary/20 border border-teal-primary/30 text-white text-sm font-semibold backdrop-blur-sm">
+                        <i class="fas fa-sparkles mr-2 text-teal-primary"></i>AI-Powered Financial Planning
+                    </span>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
+                    <span class="bg-gradient-to-r from-teal-primary via-cyan-400 to-purple-primary bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,217,255,0.3)]">
+                        WanderWallet
+                    </span>
+                </h1>
+                <h2 class="text-2xl md:text-4xl font-bold text-white mb-6">
+                    Smart Budget & Travel Planning
+                </h2>
+                <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    Track your expenses, plan dream vacations, and achieve financial freedom with AI-powered insights.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+                    <a href="{{ url_for('signup') }}" class="btn-primary px-8 py-3 shadow-lg hover:shadow-2xl">
+                        <i class="fas fa-rocket mr-2"></i>Get Started Free
+                    </a>
+                    <a href="#features" class="btn-secondary px-8 py-3">
+                        <i class="fas fa-info-circle mr-2"></i>Learn More
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent to-dark-secondary/50">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-6 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-3">
+                    About <span class="bg-gradient-to-r from-teal-primary to-purple-primary bg-clip-text text-transparent">WanderWallet</span>
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-teal-primary to-purple-primary mx-auto"></div>
+            </div>
+            
+            <div class="glass-card p-8 md:p-10 fade-in text-center border-2 border-teal-primary/10" style="animation-delay: 0.1s">
+                <p class="text-lg md:text-xl text-gray-200 leading-relaxed mb-4">
+                    WanderWallet is a smart AI-powered travel and budget binder designed to help users plan trips, track expenses, and save efficiently — all in one dashboard.
+                </p>
+                <p class="text-base md:text-lg text-gray-400 leading-relaxed">
+                    Developed by <span class="text-teal-primary font-semibold">Shruti Singh Vishene</span>, <span class="text-teal-primary font-semibold">Harshita Mundra</span>, <span class="text-teal-primary font-semibold">Shemani Taneja</span>, and <span class="text-teal-primary font-semibold">Priyanshu Soni</span>, this project aims to make financial planning and travel management simple, intelligent, and user-friendly.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-10 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-8 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-3">
+                    Powerful <span class="bg-gradient-to-r from-teal-primary to-purple-primary bg-clip-text text-transparent">Features</span>
+                </h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-teal-primary to-purple-primary mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Budget Tracker -->
+                <div class="feature-card text-center fade-in" style="animation-delay: 0.1s">
+                    <div class="icon-badge mx-auto mb-3" style="width: 4rem; height: 4rem; font-size: 2rem;">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Budget Tracker</h3>
+                    <p class="text-sm text-gray-400">
+                        Track spending easily with smart visualizations
+                    </p>
+                </div>
+                
+                <!-- AI Trip Planner -->
+                <div class="feature-card text-center fade-in" style="animation-delay: 0.2s">
+                    <div class="icon-badge mx-auto mb-3" style="width: 4rem; height: 4rem; font-size: 2rem; color: #a855f7">
+                        <i class="fas fa-plane-departure"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">AI Trip Planner</h3>
+                    <p class="text-sm text-gray-400">
+                        Plan trips smartly with AI
+                    </p>
+                </div>
+                
+                <!-- Expense Analytics -->
+                <div class="feature-card text-center fade-in" style="animation-delay: 0.3s">
+                    <div class="icon-badge mx-auto mb-3" style="width: 4rem; height: 4rem; font-size: 2rem; color: #f59e0b">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Expense Analytics</h3>
+                    <p class="text-sm text-gray-400">
+                        Visualize spending patterns with detailed insights
+                    </p>
+                </div>
+                
+                <!-- Smart Assistant -->
+                <div class="feature-card text-center fade-in" style="animation-delay: 0.4s">
+                    <div class="icon-badge mx-auto mb-3" style="width: 4rem; height: 4rem; font-size: 2rem; color: #3b82f6">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Smart Assistant</h3>
+                    <p class="text-sm text-gray-400">
+                        Get AI-powered financial advice instantly
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    </div>
+    <!-- Footer Section -->
+    <footer class="relative z-10 py-8 px-4 sm:px-6 lg:px-8 border-t border-teal-primary/10 bg-dark-secondary/50 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Brand -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-3">
+                        <span class="bg-gradient-to-r from-teal-primary to-purple-primary bg-clip-text text-transparent">
+                            WanderWallet
+                        </span>
+                    </h3>
+                    <p class="text-gray-400 mb-3">
+                        Your intelligent companion for budget management and travel planning.
+                    </p>
+                </div>
+                
+                <!-- Contact -->
+                <div>
+                    <h4 class="text-white font-semibold mb-3">Contact Us</h4>
+                    <p class="text-gray-400 mb-2">
+                        <i class="fas fa-users mr-2 text-teal-primary"></i>
+                        <span class="font-semibold">Project Developed By:</span>
+                    </p>
+                    <p class="text-gray-300 text-sm mb-2">
+                        Shruti Singh Vishene | Harshita Mundra | Shemani Taneja | Priyanshu Soni
+                    </p>
+                    <p class="text-gray-400 text-sm">
+                        <i class="fas fa-envelope mr-2 text-teal-primary"></i>
+                        wanderwallet.team@gmail.com
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Bottom Bar -->
+            <div class="pt-6 border-t border-teal-primary/10">
+                <p class="text-gray-400 text-sm text-center mb-2">
+                    © 2025 WanderWallet. All rights reserved. Built with <i class="fas fa-heart text-teal-primary"></i> for smart travelers.
+                </p>
+                <p class="text-gray-500 text-xs text-center">
+                    <i class="fas fa-code mr-1 text-purple-primary"></i>Powered by Gemini AI & Flask | Designed with Tailwind CSS
+                </p>
+            </div>
+        </div>
+    </footer>
+{% endblock %}
