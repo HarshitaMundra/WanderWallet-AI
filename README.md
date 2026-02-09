@@ -1,4 +1,4 @@
-WanderWallet
+WanderWallet.ai this is a file
 
 WanderWallet is an AI-powered travel and budget management platform designed to simplify trip planning and financial tracking. By integrating personalized budget insights, live travel suggestions, and interactive dashboards, the platform helps users reduce search time and make smarter travel decisions—all in one place.
 
